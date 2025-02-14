@@ -2,7 +2,7 @@ all: listen
 
 build:
 	@echo "Building wsl2-ssh-bridge..."
-	@GOOS=windows go build -o wsl2-ssh-bridge.exe -ldflags -H=windowsgui main.go
+	@GOOS=windows go build -o wsl2-ssh-bridge.exe main.go
 
 SSH_PATH := "${USERPROFILE}/.ssh/"
 install: build
