@@ -1,6 +1,6 @@
 module github.com/blackreloaded/wsl2-ssh-bridge
 
-go 1.20
+go 1.24
 
 require (
 	github.com/Microsoft/go-winio v0.6.1
