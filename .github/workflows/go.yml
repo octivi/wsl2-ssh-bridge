@@ -17,7 +17,7 @@ jobs:
       - name: Build
         env:
           GOOS: windows
-        run: go build -o wsl2-ssh-bridge.exe -ldflags -H=windowsgui main.go
+        run: go build -o wsl2-ssh-bridge.exe main.go
 
       - name: Upload artifact
         uses: actions/upload-artifact@v1.0.0
