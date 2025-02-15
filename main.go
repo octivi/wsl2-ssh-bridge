@@ -14,7 +14,6 @@ import (
 	"path/filepath"
 	"reflect"
 	"strconv"
-	"syscall"
 	"unsafe"
 
 	"github.com/Microsoft/go-winio"
@@ -59,7 +58,12 @@ func queryPageant(buf []byte) (result []byte, err error) {
 		return
 	}
 
-	hwnd := win.FindWindow(syscall.StringToUTF16Ptr("Pageant"), syscall.StringToUTF16Ptr("Pageant"))
+	pageantWindowName, err := windows.UTF16PtrFromString("Pageant")
+	if err != nil {
+		return
+	}
+
+	hwnd := win.FindWindow(pageantWindowName, pageantWindowName)
 
 	// Launch gpg-connect-agent
 	if hwnd == 0 {
@@ -67,7 +71,7 @@ func queryPageant(buf []byte) (result []byte, err error) {
 		exec.Command("gpg-connect-agent", "/bye").Run()
 	}
 
-	hwnd = win.FindWindow(syscall.StringToUTF16Ptr("Pageant"), syscall.StringToUTF16Ptr("Pageant"))
+	hwnd = win.FindWindow(pageantWindowName, pageantWindowName)
 	if hwnd == 0 {
 		err = errors.New("Could not find Pageant window")
 		return
@@ -75,9 +79,14 @@ func queryPageant(buf []byte) (result []byte, err error) {
 
 	// Adding process id in order to support parallel requests.
 	requestName := "WSLPageantRequest" + strconv.Itoa(os.Getpid())
-	mapName := fmt.Sprintf(requestName)
+	mapName := fmt.Sprintf("%s", requestName)
 
-	fileMap, err := windows.CreateFileMapping(invalidHandleValue, nil, pageReadWrite, 0, agentMaxMessageLength, syscall.StringToUTF16Ptr(mapName))
+	mapNamePtr, err := windows.UTF16PtrFromString(mapName)
+	if err != nil {
+		return
+	}
+
+	fileMap, err := windows.CreateFileMapping(invalidHandleValue, nil, pageReadWrite, 0, agentMaxMessageLength, mapNamePtr)
 	if err != nil {
 		return
 	}
@@ -148,7 +157,7 @@ func main() {
 		basePath := *gpgConfigBasepath
 		// fallback to default location if not specified
 		if basePath == "" {
-			basePath = filepath.Join(homeDir, "AppData", "Roaming", "gnupg")
+			basePath = filepath.Join(homeDir, "AppData", "Local", "gnupg")
 		}
 		handleGPG(filepath.Join(basePath, *gpg))
 		return
