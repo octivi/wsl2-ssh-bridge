@@ -79,7 +79,7 @@ func queryPageant(buf []byte) (result []byte, err error) {
 
 	// Adding process id in order to support parallel requests.
 	requestName := "WSLPageantRequest" + strconv.Itoa(os.Getpid())
-	mapName := fmt.Sprintf(requestName)
+	mapName := fmt.Sprintf("%s", requestName)
 
 	mapNamePtr, err := windows.UTF16PtrFromString(mapName)
 	if err != nil {
